@@ -1,6 +1,17 @@
 package fetcher
 
-func Fetch(url string) (string, error) {
+import "net/http"
 
-	return "", nil
+func Fetch(url string) (*http.Response, error) {
+	resp, err := http.Get(url)
+
+	if err != nil {
+		return nil, checkErr(err)
+	}
+
+	return resp, nil
+}
+
+func checkErr(err error) error {
+	return nil
 }
