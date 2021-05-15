@@ -11,3 +11,11 @@ func TestFetch(t *testing.T) {
 
 	assert.Equal(t, err, nil)
 }
+
+func TestReportError(t *testing.T) {
+	// _, _ := Fetch("http://invalid")
+}
+
+func TestIsBanCase(t *testing.T) {
+
+}
