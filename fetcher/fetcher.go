@@ -6,20 +6,28 @@ func Fetch(url string) (*http.Response, error) {
 	resp, err := http.Get(url)
 
 	if err != nil {
-		reportError(err)
+		go reportError(err)
 	}
 
 	return resp, err
 }
 
-func reportError(err error) error {
+func reportError(err error) {
 	if isBanCase(err) {
-		return nil
+		reportBanError(err)
 	} else {
-		return nil
+		reportHttpError(err)
 	}
 }
 
 func isBanCase(err error) bool {
 	return true
+}
+
+func reportBanError(err error) {
+
+}
+
+func reportHttpError(err error) {
+
 }
