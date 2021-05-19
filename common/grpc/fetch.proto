@@ -1,0 +1,19 @@
+option go_package = "github.com/island-brother/crawler/common/grpc";
+
+service Fetcher {
+    rpc fetch (FetchURL) returns (Response) {}
+}
+
+message FetchURL{
+    string url = 1;
+}
+
+message Response {
+    string code = 1;
+    string header = 2;
+    string body = 3;
+}
+
+message Error {
+    string type = 1;
+}
