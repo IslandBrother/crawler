@@ -1,3 +1,5 @@
+syntax = "proto3";
+
 option go_package = "github.com/island-brother/crawler/common/grpc";
 
 service Fetcher {
