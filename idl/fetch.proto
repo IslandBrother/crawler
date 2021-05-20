@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/island-brother/crawler/common/grpc";
+option go_package = "github.com/island-brother/crawler/idl";
 
 service Fetcher {
     rpc fetch (FetchURL) returns (Response) {}
