@@ -4,21 +4,39 @@ import "net/http"
 import "github.com/island-brother/crawler/data"
 import "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 
-func Fetch(url string) (*http.Response, error) {
+func Fetch(url string) {
 	resp, err := http.Get(url)
 
 	if err != nil {
 		go reportError(resp, err)
 	}
 
-	topic := "fetched"
+	sendHtml(resp)
+}
+
+func sendHtml(resp *http.Response){
+	err := sendHtmlToKafka(resp)
+	if(err != nil){
+		sendToParserDirectly(resp)
+	}
+}
+
+func sendHtmlToKafka(resp *http.Response){
+	topic := "html"
 	producer := data.KafkaProducer();
+
+	defer producer.Close()
+	
 	producer.Produce(&kafka.Message{
 		TopicPartition: kafaka.TopicPartition{Topic: &fetched, Partition: kafka.PartitionAny},
-		value:[]byte(resp)
+		value:resp.Body
 	})
 
-	return resp, err
+	producer.Flush(15 * 1000)
+}
+
+func sendToParserDirectly(resp *http.Response){
+	//grpc will be used
 }
 
 func reportError(resp *http.Response, err error) {
