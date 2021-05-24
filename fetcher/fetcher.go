@@ -27,9 +27,14 @@ func sendHtmlToKafka(resp *http.Response){
 
 	defer producer.Close()
 	
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        log.Fatal(err)
+    }
+
 	producer.Produce(&kafka.Message{
 		TopicPartition: kafaka.TopicPartition{Topic: &fetched, Partition: kafka.PartitionAny},
-		value:resp.Body
+		value:string(bodyBytes)
 	})
 
 	producer.Flush(15 * 1000)
