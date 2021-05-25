@@ -11,3 +11,17 @@ func KafkaProducer() *kafka.Producer {
 	}
 	return p
 }
+
+func KafkaConsumer(topics []string) *kafka.Consumer {
+	c, err := kafka.NewConsumer(&kafka.ConfigMap{"bootstrap.servers": "localhost",
+		"group.id":          "myGroup",
+		"auto.offset.reset": "earliest",
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	c.SubscribeTopics(topics, nil)
+
+	return c
+}
