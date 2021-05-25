@@ -3,6 +3,7 @@ package fetcher
 import "net/http"
 import "github.com/island-brother/crawler/data"
 import "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
+import "io/ioutil"
 
 func Fetch(url string) {
 	resp, err := http.Get(url)
@@ -11,36 +12,38 @@ func Fetch(url string) {
 		go reportError(resp, err)
 	}
 
-	sendHtml(resp)
+	go sendHtml(resp)
 }
 
-func sendHtml(resp *http.Response){
+func sendHtml(resp *http.Response) {
 	err := sendHtmlToKafka(resp)
-	if(err != nil){
+	if err != nil {
 		sendToParserDirectly(resp)
 	}
 }
 
-func sendHtmlToKafka(resp *http.Response){
-	topic := "html"
-	producer := data.KafkaProducer();
+func sendHtmlToKafka(resp *http.Response) error {
+	topic := "content"
+	producer := data.KafkaProducer()
 
 	defer producer.Close()
-	
+
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        log.Fatal(err)
-    }
+	if err != nil {
+		return err
+	}
 
 	producer.Produce(&kafka.Message{
-		TopicPartition: kafaka.TopicPartition{Topic: &fetched, Partition: kafka.PartitionAny},
-		value:string(bodyBytes)
-	})
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		Value:          bodyBytes,
+	}, nil)
 
-	producer.Flush(15 * 1000)
+	producer.Flush(1 * 1000)
+
+	return nil
 }
 
-func sendToParserDirectly(resp *http.Response){
+func sendToParserDirectly(resp *http.Response) {
 	//grpc will be used
 }
 
