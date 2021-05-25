@@ -4,6 +4,28 @@
 Pinetrest 수준의 이미지 검색 시스템을 위한 이미지 데이터 수집 crawler.    
 kafka와 grpc를 사용한 MSA 형태로 구현 예정.
 
+## Getting Started
+### Kafka - install and make topic
+```bash
+brew install zookeeper
+brew install kafka
+
+brew services start zookeeper
+brew services start kafka
+
+kafka-topics --create \
+--zookeeper localhost:2181 \
+--replication-factor 1 \
+--partitions 3 \
+--topic url
+
+kafka-topics --create \
+--zookeeper localhost:2181 \
+--replication-factor 1 \
+--partitions 3 \
+--topic url
+```
+
 ## components
 ### common
 공통으로 사용되는 Data Type 또는 Util이 정의가 된다.
