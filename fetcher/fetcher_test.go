@@ -14,7 +14,7 @@ func TestSendHtmlToKafka(t *testing.T) {
 	sendHtmlToKafka(resp)
 	bodyBytes, _ := ioutil.ReadAll(resp.Body)
 
-	consumer := data.KafkaConsumer([]string{"content"})
+	consumer := data.KafkaConsumer("test", []string{"content"})
 	msg, err := consumer.ReadMessage(-1)
 
 	if err != nil {
@@ -22,6 +22,7 @@ func TestSendHtmlToKafka(t *testing.T) {
 	} else {
 		fmt.Printf("Consumer error: %v (%v)\n", err, msg)
 	}
+
 	assert.Equal(t, bodyBytes, msg.Value)
 }
 
@@ -30,14 +31,14 @@ func TestReportError(t *testing.T) {
 }
 
 func TestIsBanCase(t *testing.T) {
-	// resp, _ := Fetch("http://www.naver.com")
-	// resp.StatusCode = 429
-	// result := isBanCase(resp)
-	// assert.Equal(t, true, result)
+	resp, _ := http.Get("http://www.naver.com")
+	resp.StatusCode = 429
+	result := isBanCase(resp)
+	assert.Equal(t, true, result)
 }
 
 func TestIsNotBanCase(t *testing.T) {
-	// resp, _ := Fetch("http://www.naver.com")
-	// result := isBanCase(resp)
-	// assert.Equal(t, false, result)
+	resp, _ := http.Get("http://www.naver.com")
+	result := isBanCase(resp)
+	assert.Equal(t, false, result)
 }
