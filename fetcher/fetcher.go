@@ -1,13 +1,17 @@
 package fetcher
 
-import "net/http"
-import "github.com/island-brother/crawler/data"
-import "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
-import "io/ioutil"
+import (
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
 
-type Data struct {
-	url  string
-	html string
+	"github.com/island-brother/crawler/data"
+	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
+)
+
+type Fetched struct {
+	URL     string
+	Content string
 }
 
 func Fetch(url string) {
@@ -17,8 +21,9 @@ func Fetch(url string) {
 		go reportError(resp, err)
 	}
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	go sendHtml(&Data{url: url, html: string(bodyBytes)})
+	bodyBytes, _ := ioutil.ReadAll(resp.Body)
+
+	go sendFetched(&Fetched{URL: url, Content: string(bodyBytes)})
 }
 
 func reportError(resp *http.Response, err error) {
@@ -41,27 +46,23 @@ func reportHttpError(err error) {
 
 }
 
-func sendHtml(resp *http.Response) {
-	err := sendHtmlToKafka(resp)
+func sendFetched(fetched *Fetched) {
+	err := sendFetchedToKafka(fetched)
 	if err != nil {
-		sendToParser(resp)
+		sendFetchedToParser(fetched)
 	}
 }
 
-func sendHtmlToKafka(resp *http.Response) error {
-	topic := "content"
+func sendFetchedToKafka(fetched *Fetched) error {
+	topic := "fetched"
 	producer := data.KafkaProducer()
 
 	defer producer.Close()
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
+	value, _ := json.Marshal(fetched)
 	producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-		Value:          bodyBytes,
+		Value:          value,
 	}, nil)
 
 	producer.Flush(1 * 1000)
@@ -69,6 +70,6 @@ func sendHtmlToKafka(resp *http.Response) error {
 	return nil
 }
 
-func sendToParser(resp *http.Response) {
+func sendFetchedToParser(fetched *Fetched) {
 	//grpc will be used
 }

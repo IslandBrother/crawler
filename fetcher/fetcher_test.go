@@ -1,20 +1,26 @@
 package fetcher
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/island-brother/crawler/data"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/island-brother/crawler/data"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSendHtmlToKafka(t *testing.T) {
-	resp, _ := http.Get("http://www.naver.com")
-	sendHtmlToKafka(resp)
+
+	url := "http://demo.wisetracker.co.kr/test.html"
+
+	resp, _ := http.Get(url)
 	bodyBytes, _ := ioutil.ReadAll(resp.Body)
 
-	consumer := data.KafkaConsumer("test", []string{"content"})
+	sendFetchedToKafka(&Fetched{URL: url, Content: string(bodyBytes)})
+
+	consumer := data.KafkaConsumer("test", []string{"fetched"})
 	msg, err := consumer.ReadMessage(-1)
 
 	if err != nil {
@@ -23,7 +29,10 @@ func TestSendHtmlToKafka(t *testing.T) {
 		fmt.Printf("Consumer error: %v (%v)\n", err, msg)
 	}
 
-	assert.Equal(t, bodyBytes, msg.Value)
+	fetched := Fetched{}
+	json.Unmarshal(msg.Value, &fetched)
+
+	assert.Equal(t, url, fetched.URL)
 }
 
 func TestReportError(t *testing.T) {
