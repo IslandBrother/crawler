@@ -10,3 +10,15 @@ type Error struct {
 	StatusCode int
 	Error      string
 }
+
+type ExtractedData struct {
+	Title       string
+	Description string
+	Tags        []string
+	URLs        []string
+}
+
+type ImgInfo struct {
+	URL         string
+	Description string
+}
