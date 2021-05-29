@@ -49,6 +49,12 @@ func consumeFetched() Fetched {
 	return fetched
 }
 
+func TestFetchWithReturn(t *testing.T) {
+	url := TestBasicUrl
+	fetched := FetchWithReturn(url)
+	fmt.Println(fetched.URL)
+}
+
 func TestIsBanCase(t *testing.T) {
 	resp, _ := getBanCaseResp(TestBasicUrl)
 	result := isBanCase(resp)

@@ -23,6 +23,18 @@ func Fetch(url string) {
 	go sendToKafka(KAFKA_TOPIC_FETCHED, &Fetched{URL: url, Content: string(bodyBytes)})
 }
 
+func FetchWithReturn(url string) *Fetched {
+	resp, err := http.Get(url)
+
+	if err != nil {
+		go reportError(resp, err)
+	}
+
+	bodyBytes, _ := ioutil.ReadAll(resp.Body)
+
+	return &Fetched{URL: url, Content: string(bodyBytes)}
+}
+
 func reportError(resp *http.Response, err error) {
 	if isBanCase(resp) {
 		reportBanError(resp, err)
