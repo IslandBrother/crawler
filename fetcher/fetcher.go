@@ -2,17 +2,13 @@ package fetcher
 
 import (
 	"encoding/json"
+	. "github.com/island-brother/crawler/common"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/island-brother/crawler/data"
+	"github.com/island-brother/crawler/conn"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
-
-type Fetched struct {
-	URL     string
-	Content string
-}
 
 func Fetch(url string) {
 	resp, err := http.Get(url)
@@ -23,14 +19,14 @@ func Fetch(url string) {
 
 	bodyBytes, _ := ioutil.ReadAll(resp.Body)
 
-	go sendFetched(&Fetched{URL: url, Content: string(bodyBytes)})
+	go sendToKafka(KAFKA_TOPIC_FETCHED, &Fetched{URL: url, Content: string(bodyBytes)})
 }
 
 func reportError(resp *http.Response, err error) {
 	if isBanCase(resp) {
-		reportBanError(err)
+		reportBanError(resp, err)
 	} else {
-		reportHttpError(err)
+		reportHttpError(resp, err)
 	}
 }
 
@@ -38,38 +34,32 @@ func isBanCase(resp *http.Response) bool {
 	return resp.StatusCode == 429
 }
 
-func reportBanError(err error) {
-
+func reportBanError(resp *http.Response, err error) {
+	sendToKafka(KAFKA_TOPIC_BANNED, Error{
+		URL:        resp.Request.URL.RequestURI(),
+		StatusCode: resp.StatusCode,
+		Error:      err.Error(),
+	})
 }
 
-func reportHttpError(err error) {
-
+func reportHttpError(resp *http.Response, err error) {
+	sendToKafka(KAFKA_TOPIC_HTTP_ERROR, Error{
+		URL:        resp.Request.URL.RequestURI(),
+		StatusCode: resp.StatusCode,
+		Error:      err.Error(),
+	})
 }
 
-func sendFetched(fetched *Fetched) {
-	err := sendFetchedToKafka(fetched)
-	if err != nil {
-		sendFetchedToParser(fetched)
-	}
-}
-
-func sendFetchedToKafka(fetched *Fetched) error {
-	topic := "fetched"
-	producer := data.KafkaProducer()
+func sendToKafka(topic string, data interface{}) {
+	producer := conn.KafkaProducer()
 
 	defer producer.Close()
 
-	value, _ := json.Marshal(fetched)
+	kafkaValue, _ := json.Marshal(data)
 	producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
-		Value:          value,
+		Value:          kafkaValue,
 	}, nil)
 
 	producer.Flush(1 * 1000)
-
-	return nil
-}
-
-func sendFetchedToParser(fetched *Fetched) {
-	//grpc will be used
 }
