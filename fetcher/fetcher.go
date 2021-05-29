@@ -2,9 +2,10 @@ package fetcher
 
 import (
 	"encoding/json"
-	. "github.com/island-brother/crawler/common"
 	"io/ioutil"
 	"net/http"
+
+	. "github.com/island-brother/crawler/common"
 
 	"github.com/island-brother/crawler/conn"
 	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
@@ -38,7 +39,7 @@ func reportBanError(resp *http.Response, err error) {
 	sendToKafka(KAFKA_TOPIC_BANNED, Error{
 		URL:        resp.Request.URL.RequestURI(),
 		StatusCode: resp.StatusCode,
-		Error:      err.Error(),
+		Error:      GetErrorString(err),
 	})
 }
 
@@ -46,7 +47,7 @@ func reportHttpError(resp *http.Response, err error) {
 	sendToKafka(KAFKA_TOPIC_HTTP_ERROR, Error{
 		URL:        resp.Request.URL.RequestURI(),
 		StatusCode: resp.StatusCode,
-		Error:      err.Error(),
+		Error:      GetErrorString(err),
 	})
 }
 
