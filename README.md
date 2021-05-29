@@ -18,6 +18,18 @@ kafka-topics --create \
 --replication-factor 1 \
 --partitions 3 \
 --topic fetched
+
+kafka-topics --create \
+--zookeeper localhost:2181 \
+--replication-factor 1 \
+--partitions 3 \
+--topic banned
+
+kafka-topics --create \
+--zookeeper localhost:2181 \
+--replication-factor 1 \
+--partitions 3 \
+--topic http-error
 ```
 
 ## components
