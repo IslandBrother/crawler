@@ -52,6 +52,13 @@ kafka-topics --create \
 --topic http-error
 ```
 
+### Mongo DB
+docker
+```bash
+docker pull mongo    
+docker run --name some-mongo -d mongo:tag
+```
+
 ## components
 ### common
 공통으로 사용되는 Data Type 또는 Util이 정의가 된다.
