@@ -5,14 +5,34 @@ Pinetrest 수준의 이미지 검색 시스템을 위한 이미지 데이터 수
 kafka와 grpc를 사용한 MSA 형태로 구현 예정.
 
 ## Getting Started
-### Kafka - install and make topic
+### Kafka Install & Run
+brew
 ```bash
 brew install zookeeper
 brew install kafka
 
+# Statt
 brew services start zookeeper
 brew services start kafka
 
+# Stop
+brew services stop kafka
+brew services stop zookeeper
+```
+
+docker
+```bash
+cd ./docker/kafka
+
+# Start
+docker-compose up -d
+
+# Stop
+docker-compose down
+```
+
+### Kafka Add Topics
+```bash
 kafka-topics --create \
 --zookeeper localhost:2181 \
 --replication-factor 1 \
@@ -30,6 +50,13 @@ kafka-topics --create \
 --replication-factor 1 \
 --partitions 3 \
 --topic http-error
+```
+
+### Mongo DB
+docker
+```bash
+docker pull mongo    
+docker run --name some-mongo -d mongo:tag
 ```
 
 ## components
@@ -52,6 +79,7 @@ fetcher가 넘겨준 URL의 페이지에서 필요한 데이터와 새롭게 탐
 
 ### url filter
 해당 도메인의 robots.txt 파일을 참조해서 어떤 URL들을 URL set에 넣을 것인지 filter 한다.
+
 
 ## data
 ### url set
