@@ -1,16 +1,21 @@
 package conn
 
-// import (
-// 	"context"
+import (
+	"context"
+	"log"
+	"time"
 
-// 	"go.mongodb.org/mongo-driver/mongo"
-// 	"go.mongodb.org/mongo-driver/mongo/options"
-// 	"go.mongodb.org/mongo-driver/mongo/readpref"
-// )
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
 
-func mogodb() {
-	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	// defer cancel()
-	// client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
-	// return
+func mogodb() (*mongo.Client, error) {
+	client, err := mongo.NewClient(options.Client().ApplyURI(""))
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = client.Connect(ctx)
+	
+	return client, err
 }
