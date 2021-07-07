@@ -56,7 +56,7 @@ kafka-topics --create \
 docker
 ```bash
 docker pull mongo    
-docker run --name some-mongo -d mongo:tag
+docker run --name crawler -d mongo:5.0.0-rc4-focal
 ```
 
 ## components
